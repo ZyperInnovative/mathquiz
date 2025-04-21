@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Quiz</title>
+  <style>
+    body {
+      background: #1e1e2f;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card, .signup {
+      background: #2a2a40;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+    .card h1, .signup h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+    }
+    input[type="number"], input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #4c9aff;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin: 0.25rem;
+    }
+    button:hover {
+      background-color: #367cd7;
+    }
+    .result {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    .score {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #4caf50;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .solution {
+      margin-top: 1rem;
+      background-color: #333;
+      padding: 1rem;
+      border-radius: 10px;
+      display: none;
+    }
+    .greeting {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: red;
+      font-weight:bold;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="score" id="score">Score: 0</div>  <div class="signup" id="signupBox">
+    <h2>Sign Up</h2>
+    <input type="text" id="username" placeholder="Enter your name" />
+    <button onclick="saveUsername()">Start Learning</button>
+  </div>  <div class="greeting" id="greeting" style="display:none;"></div>  <div class="card" id="quizCard" style="display:none;">
+    <h1>Math Quiz</h1>
+    <div class="question" id="question">Loading question...</div>
+    <input type="number" id="answer" placeholder="Your answer" />
+    <div>
+      <button onclick="submitAnswer()">Submit</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="solution" id="solutionBox"></div>
+  </div>  <script>
+    let score = 0;
+    let currentAnswer = 0;
+    let currentExplanation = '';
+
+    function getRandomQuestion() {
+      const type = Math.floor(Math.random() * 3); // 0 = multiplication, 1 = square root, 2 = cube root
+      let questionText = '';
+      let answer = 0;
+      let explanation = '';
+
+      if (type === 0) {
+        const a = Math.floor(Math.random() * 10 + 2);
+        const b = Math.floor(Math.random() * 10 + 2);
+        questionText = `What is ${a} × ${b}?`;
+        answer = a * b;
+        explanation = `To solve ${a} × ${b}, you multiply the two numbers together: ${a} × ${b} = ${answer}.`;
+      } else if (type === 1) {
+        const result = Math.floor(Math.random() * 13 + 2);
+        const value = result * result;
+        questionText = `What is √${value}?`;
+        answer = result;
+        explanation = `To find √${value}, think of the number that when multiplied by itself gives ${value}. Since ${result} × ${result} = ${value}, the answer is ${result}.`;
+      } else {
+        const result = Math.floor(Math.random() * 6 + 2);
+        const value = result * result * result;
+        questionText = `What is ³√${value}?`;
+        answer = result;
+        explanation = `To solve ³√${value}, find the number that when cubed gives ${value}. ${result} × ${result} × ${result} = ${value}, so the answer is ${result}.`;
+      }
+
+      document.getElementById('question').textContent = questionText;
+      currentAnswer = answer;
+      currentExplanation = explanation;
+      document.getElementById('answer').value = '';
+      document.getElementById('result').textContent = '';
+      document.getElementById('solutionBox').style.display = 'none';
+      document.getElementById('solutionBox').textContent = '';
+    }
+
+    function submitAnswer() {
+      const userAnswer = parseFloat(document.getElementById('answer').value);
+      const resultDiv = document.getElementById('result');
+      const solutionBox = document.getElementById('solutionBox');
+
+      if (userAnswer === currentAnswer) {
+        resultDiv.textContent = 'Correct!';
+        resultDiv.style.color = '#4caf50';
+        score++;
+        document.getElementById('score').textContent = `Score: ${score}`;
+        setTimeout(getRandomQuestion, 1000);
+      } else {
+        resultDiv.textContent = 'Try again!';
+        resultDiv.style.color = '#ff4c4c';
+        solutionBox.style.display = 'block';
+        solutionBox.textContent = currentExplanation;
+      }
+    }
+
+    function saveUsername() {
+      const username = document.getElementById('username').value.trim();
+      if (username) {
+        localStorage.setItem('mathQuizUser', username);
+        loadUser();
+      }
+    }
+
+    function loadUser() {
+      const user = localStorage.getItem('mathQuizUser');
+      if (user) {
+        document.getElementById('signupBox').style.display = 'none';
+        document.getElementById('quizCard').style.display = 'block';
+        document.getElementById('greeting').style.display = 'block';
+        const hour = new Date().getHours();
+        let greeting = 'Hello';
+        if (hour < 12) greeting = 'Good morning';
+        else if (hour < 18) greeting = 'Good afternoon';
+        else greeting = 'Good evening';
+        document.getElementById('greeting').textContent = `${greeting}, ${user}! Let's learn Mathematics. Are you ready?`;
+        getRandomQuestion();
+      }
+    }
+
+    loadUser();
+  </script></body>
+</html>
